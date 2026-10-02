@@ -1,0 +1,140 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct {
+    long long team;
+    long long rating;
+    int pos;
+} Entry;
+
+typedef struct {
+    int pos;
+    int wait;
+} Result;
+
+int compareTeam(const void *a, const void *b) {
+    Entry *x = (Entry *)a;
+    Entry *y = (Entry *)b;
+
+    if (x->team < y->team) return -1;
+    if (x->team > y->team) return 1;
+    return x->pos - y->pos;
+}
+
+int compareResult(const void *a, const void *b) {
+    Result *x = (Result *)a;
+    Result *y = (Result *)b;
+
+    if (x->wait != y->wait)
+        return y->wait - x->wait;
+
+    return x->pos - y->pos;
+}
+
+int main() {
+    int n, K;
+    scanf("%d %d", &n, &K);
+
+    Entry *entries = malloc(n * sizeof(Entry));
+    int *ans = malloc(n * sizeof(int));
+
+    for (int i = 0; i < n; i++) {
+        scanf("%lld %lld", &entries[i].team, &entries[i].rating);
+        entries[i].pos = i;
+        ans[i] = -1;
+    }
+
+    /*
+       Sort by team first, then by original position.
+       This groups every team's entries together while
+       keeping their chronological order.
+    */
+    qsort(entries, n, sizeof(Entry), compareTeam);
+
+    /*
+       Process each team separately.
+    */
+    int start = 0;
+
+    while (start < n) {
+        int end = start + 1;
+
+        while (end < n && entries[end].team == entries[start].team)
+            end++;
+
+        int *stack = malloc((end - start) * sizeof(int));
+        int top = -1;
+
+        /*
+           stack stores indexes into entries.
+           We maintain decreasing ratings from bottom to top.
+        */
+        for (int i = start; i < end; i++) {
+
+            while (top >= 0 &&
+                   entries[i].rating > entries[stack[top]].rating) {
+
+                int previous = stack[top--];
+
+                ans[entries[previous].pos] =
+                    entries[i].pos - entries[previous].pos;
+            }
+
+            stack[++top] = i;
+        }
+
+        free(stack);
+        start = end;
+    }
+
+    /*
+       Collect entries that have a finite answer.
+    */
+    Result *results = malloc(n * sizeof(Result));
+    int count = 0;
+
+    for (int i = 0; i < n; i++) {
+        if (ans[i] != -1) {
+            results[count].pos = i + 1;
+            results[count].wait = ans[i];
+            count++;
+        }
+    }
+
+    /*
+       Sort by:
+       - larger waiting figure first
+       - earlier position for ties
+    */
+    qsort(results, count, sizeof(Result), compareResult);
+
+    /*
+       First line: answer for every entry.
+    */
+    for (int i = 0; i < n; i++) {
+        if (i > 0)
+            printf(" ");
+        printf("%d", ans[i]);
+    }
+
+    printf("\n");
+
+    /*
+       Second line: leaderboard.
+    */
+    int limit = count < K ? count : K;
+
+    for (int i = 0; i < limit; i++) {
+        if (i > 0)
+            printf(" ");
+        printf("%d", results[i].pos);
+    }
+
+    printf("\n");
+
+    free(entries);
+    free(ans);
+    free(results);
+
+    return 0;
+}
