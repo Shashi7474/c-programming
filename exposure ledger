@@ -1,0 +1,128 @@
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAXN 200005
+#define MAXT 4000005
+
+typedef struct {
+    int left, right, sum;
+} Node;
+
+int a[MAXN], vals[MAXN], roots[MAXN];
+int bit[MAXN];
+Node tree[MAXT];
+int nodes = 0;
+
+int cmp(const void *x, const void *y) {
+    int a = *(const int *)x;
+    int b = *(const int *)y;
+    return (a > b) - (a < b);
+}
+
+int update(int prev, int lo, int hi, int pos) {
+    int cur = ++nodes;
+    tree[cur] = tree[prev];
+    tree[cur].sum++;
+
+    if (lo != hi) {
+        int mid = lo + (hi - lo) / 2;
+        if (pos <= mid)
+            tree[cur].left = update(tree[prev].left, lo, mid, pos);
+        else
+            tree[cur].right = update(tree[prev].right, mid + 1, hi, pos);
+    }
+    return cur;
+}
+
+int kth(int u, int v, int lo, int hi, int k) {
+    if (lo == hi) return vals[lo];
+
+    int leftCount =
+        tree[tree[v].left].sum - tree[tree[u].left].sum;
+    int mid = lo + (hi - lo) / 2;
+
+    if (k <= leftCount)
+        return kth(tree[u].left, tree[v].left, lo, mid, k);
+
+    return kth(tree[u].right, tree[v].right,
+               mid + 1, hi, k - leftCount);
+}
+
+void add(int i, int value, int n) {
+    while (i <= n) {
+        bit[i] += value;
+        i += i & -i;
+    }
+}
+
+int query(int i) {
+    int sum = 0;
+    while (i > 0) {
+        sum += bit[i];
+        i -= i & -i;
+    }
+    return sum;
+}
+
+int main(void) {
+    int n, q;
+    if (scanf("%d %d", &n, &q) != 2) return 0;
+
+    for (int i = 1; i <= n; i++) {
+        scanf("%d", &a[i]);
+        vals[i - 1] = a[i];
+    }
+
+    qsort(vals, n, sizeof(int), cmp);
+
+    int m = 0;
+    for (int i = 0; i < n; i++) {
+        if (m == 0 || vals[i] != vals[m - 1])
+            vals[m++] = vals[i];
+    }
+
+    roots[0] = 0;
+    for (int i = 1; i <= n; i++) {
+        int lo = 0, hi = m - 1;
+        while (lo < hi) {
+            int mid = lo + (hi - lo) / 2;
+            if (vals[mid] < a[i])
+                lo = mid + 1;
+            else
+                hi = mid;
+        }
+        roots[i] = update(roots[i - 1], 0, m - 1, lo);
+    }
+
+    int flagged[MAXN] = {0};
+
+    while (q--) {
+        char op[16];
+        scanf("%15s", op);
+
+        if (strcmp(op, "RANK") == 0) {
+            int l, r, k;
+            scanf("%d %d %d", &l, &r, &k);
+            printf("%d\n", kth(roots[l - 1], roots[r], 0, m - 1, k));
+        } else if (strcmp(op, "FLAG") == 0) {
+            int i;
+            scanf("%d", &i);
+
+            if (flagged[i]) {
+                flagged[i] = 0;
+                add(i, -1, n);
+            } else {
+                flagged[i] = 1;
+                add(i, 1, n);
+            }
+        } else if (strcmp(op, "AUDIT") == 0) {
+            int l, r;
+            scanf("%d %d", &l, &r);
+            printf("%d\n", query(r) - query(l - 1));
+        }
+    }
+
+    return 0;
+}
