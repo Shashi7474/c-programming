@@ -1,0 +1,33 @@
+#include <stdio.h>
+
+struct Node {
+    int data;
+    struct Node *left, *right;
+};
+
+struct Node *search(struct Node *root, int key) {
+    while (root != NULL) {
+        if (root->data == key)
+            return root;
+
+        if (key < root->data)
+            root = root->left;
+        else
+            root = root->right;
+    }
+
+    return NULL;
+}
+
+int main() {
+    struct Node c = {70, NULL, NULL};
+    struct Node b = {30, NULL, NULL};
+    struct Node a = {50, &b, &c};
+
+    int key = 70;
+
+    printf("%s", search(&a, key) != NULL
+           ? "Found" : "Not Found");
+
+    return 0;
+}
