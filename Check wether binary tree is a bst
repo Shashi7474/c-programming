@@ -1,0 +1,30 @@
+#include <stdio.h>
+#include <limits.h>
+#include <stdbool.h>
+
+struct Node {
+    int data;
+    struct Node *left, *right;
+};
+
+bool isBST(struct Node *root, long long min, long long max) {
+    if (root == NULL)
+        return true;
+
+    if (root->data <= min || root->data >= max)
+        return false;
+
+    return isBST(root->left, min, root->data) &&
+           isBST(root->right, root->data, max);
+}
+
+int main() {
+    struct Node c = {15, NULL, NULL};
+    struct Node b = {5, NULL, NULL};
+    struct Node a = {10, &b, &c};
+
+    printf("%s\n", isBST(&a, LLONG_MIN, LLONG_MAX)
+           ? "Valid BST" : "Invalid BST");
+
+    return 0;
+}
