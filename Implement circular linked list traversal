@@ -1,0 +1,28 @@
+#include <stdio.h>
+
+struct Node {
+    int data;
+    struct Node *next;
+};
+
+int main() {
+    struct Node a = {10, NULL};
+    struct Node b = {20, NULL};
+    struct Node c = {30, NULL};
+
+    a.next = &b;
+    b.next = &c;
+    c.next = &a;
+
+    struct Node *head = &a;
+    struct Node *p = head;
+
+    if (head != NULL) {
+        do {
+            printf("%d ", p->data);
+            p = p->next;
+        } while (p != head);
+    }
+
+    return 0;
+}
