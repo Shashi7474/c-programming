@@ -1,0 +1,51 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+struct Node {
+    int data;
+    struct Node *next;
+};
+
+void deleteValue(struct Node **head, int value) {
+    struct Node **p = head;
+
+    while (*p != NULL && (*p)->data != value)
+        p = &(*p)->next;
+
+    if (*p != NULL) {
+        struct Node *temp = *p;
+        *p = temp->next;
+        free(temp);
+    }
+}
+
+int main() {
+    struct Node *a = malloc(sizeof(struct Node));
+    struct Node *b = malloc(sizeof(struct Node));
+    struct Node *c = malloc(sizeof(struct Node));
+
+    if (!a || !b || !c) {
+        free(a);
+        free(b);
+        free(c);
+        return 1;
+    }
+
+    *a = (struct Node){10, b};
+    *b = (struct Node){20, c};
+    *c = (struct Node){30, NULL};
+
+    struct Node *head = a;
+    deleteValue(&head, 20);
+
+    for (struct Node *p = head; p; p = p->next)
+        printf("%d ", p->data);
+
+    while (head) {
+        struct Node *temp = head;
+        head = head->next;
+        free(temp);
+    }
+
+    return 0;
+}
