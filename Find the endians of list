@@ -1,0 +1,13 @@
+#include <stdio.h>
+
+int main() {
+    unsigned int n = 1;
+    unsigned char *p = (unsigned char *)&n;
+
+    if (*p == 1)
+        printf("Little Endian");
+    else
+        printf("Big Endian");
+
+    return 0;
+}
