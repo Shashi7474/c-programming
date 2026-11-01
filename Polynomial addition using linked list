@@ -1,0 +1,66 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+struct Node {
+    int coeff, exp;
+    struct Node *next;
+};
+
+void append(struct Node **head, int c, int e) {
+    struct Node *n = malloc(sizeof(struct Node));
+    if (!n) return;
+
+    n->coeff = c;
+    n->exp = e;
+    n->next = NULL;
+
+    if (*head == NULL) {
+        *head = n;
+        return;
+    }
+
+    struct Node *t = *head;
+    while (t->next)
+        t = t->next;
+
+    t->next = n;
+}
+
+int main() {
+    struct Node *a = NULL, *b = NULL, *result = NULL;
+
+    append(&a, 5, 2);
+    append(&a, 3, 1);
+
+    append(&b, 4, 2);
+    append(&b, 2, 0);
+
+    while (a && b) {
+        if (a->exp == b->exp) {
+            append(&result, a->coeff + b->coeff, a->exp);
+            a = a->next;
+            b = b->next;
+        } else if (a->exp > b->exp) {
+            append(&result, a->coeff, a->exp);
+            a = a->next;
+        } else {
+            append(&result, b->coeff, b->exp);
+            b = b->next;
+        }
+    }
+
+    while (a) {
+        append(&result, a->coeff, a->exp);
+        a = a->next;
+    }
+
+    while (b) {
+        append(&result, b->coeff, b->exp);
+        b = b->next;
+    }
+
+    for (struct Node *t = result; t; t = t->next)
+        printf("%dx^%d ", t->coeff, t->exp);
+
+    return 0;
+}
