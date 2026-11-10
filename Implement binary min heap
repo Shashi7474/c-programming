@@ -1,0 +1,64 @@
+#include <stdio.h>
+
+int heap[100];
+int size = 0;
+
+void insert(int value) {
+    int i = size++;
+    heap[i] = value;
+
+    while (i > 0 && heap[(i - 1) / 2] > heap[i]) {
+        int p = (i - 1) / 2;
+
+        int temp = heap[p];
+        heap[p] = heap[i];
+        heap[i] = temp;
+
+        i = p;
+    }
+}
+
+int extractMin() {
+    if (size == 0)
+        return -1;
+
+    int result = heap[0];
+    heap[0] = heap[--size];
+
+    int i = 0;
+
+    while (1) {
+        int left = 2 * i + 1;
+        int right = 2 * i + 2;
+        int smallest = i;
+
+        if (left < size && heap[left] < heap[smallest])
+            smallest = left;
+
+        if (right < size && heap[right] < heap[smallest])
+            smallest = right;
+
+        if (smallest == i)
+            break;
+
+        int temp = heap[i];
+        heap[i] = heap[smallest];
+        heap[smallest] = temp;
+
+        i = smallest;
+    }
+
+    return result;
+}
+
+int main() {
+    insert(30);
+    insert(10);
+    insert(20);
+    insert(5);
+
+    printf("Minimum: %d\n", extractMin());
+    printf("Next minimum: %d\n", extractMin());
+
+    return 0;
+}
