@@ -1,0 +1,37 @@
+#include <stdio.h>
+#include <string.h>
+
+int main() {
+    char *words[] = {
+        "flower",
+        "flow",
+        "flight"
+    };
+
+    int n = 3;
+    int i = 0;
+
+    while (words[0][i]) {
+        char ch = words[0][i];
+        int match = 1;
+
+        for (int j = 1; j < n; j++) {
+            if (words[j][i] != ch) {
+                match = 0;
+                break;
+            }
+        }
+
+        if (!match)
+            break;
+
+        i++;
+    }
+
+    printf("Common prefix: ");
+
+    for (int j = 0; j < i; j++)
+        printf("%c", words[0][j]);
+
+    return 0;
+}
