@@ -1,0 +1,123 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef long long ll;
+
+typedef struct {
+    ll *a;
+    int n;
+} Heap; /* min-heap */
+
+static void hpush(Heap *h, ll v) {
+    int i = h->n++;
+    h->a[i] = v;
+    while (i > 0) {
+        int p = (i - 1) / 2;
+        if (h->a[p] <= h->a[i]) break;
+        ll t = h->a[p]; h->a[p] = h->a[i]; h->a[i] = t;
+        i = p;
+    }
+}
+
+static ll hpop(Heap *h) {
+    ll top = h->a[0];
+    h->a[0] = h->a[--h->n];
+    int i = 0;
+    for (;;) {
+        int l = 2 * i + 1, r = l + 1, m = i;
+        if (l < h->n && h->a[l] < h->a[m]) m = l;
+        if (r < h->n && h->a[r] < h->a[m]) m = r;
+        if (m == i) break;
+        ll t = h->a[m]; h->a[m] = h->a[i]; h->a[i] = t;
+        i = m;
+    }
+    return top;
+}
+
+static int cmp(const void *x, const void *y) {
+    ll a = *(const ll *)x, b = *(const ll *)y;
+    return (a > b) - (a < b);
+}
+
+int main(void) {
+    int n, q;
+    if (scanf("%d %d", &n, &q) != 2) return 0;
+
+    Heap L, R; /* L holds negated stored values, so it acts as a max-heap */
+    L.a = (ll *)malloc(sizeof(ll) * (2 * (size_t)n + 10)); L.n = 0;
+    R.a = (ll *)malloc(sizeof(ll) * (2 * (size_t)n + 10)); R.n = 0;
+    ll addL = 0, addR = 0, mn = 0;
+
+    for (int i = 0; i < n; i++) {
+        ll lo, hi, up = 0, down = 0;
+        if (i == 0) {
+            scanf("%lld %lld", &lo, &hi);
+        } else {
+            scanf("%lld %lld %lld %lld", &lo, &hi, &up, &down);
+            addL -= down;
+            addR += up;
+        }
+        /* add (x - hi)^+ */
+        if (L.n > 0) {
+            ll t = -L.a[0] + addL - hi;
+            if (t > 0) mn += t;
+        }
+        hpush(&L, -(hi - addL));
+        {
+            ll t = -hpop(&L) + addL;
+            hpush(&R, t - addR);
+        }
+        /* add (lo - x)^+ */
+        if (R.n > 0) {
+            ll t = lo - (R.a[0] + addR);
+            if (t > 0) mn += t;
+        }
+        hpush(&R, lo - addR);
+        {
+            ll t = hpop(&R) + addR;
+            hpush(&L, -(t - addL));
+        }
+    }
+
+    printf("%lld %lld\n", mn, -L.a[0] + addL);
+
+    int na = L.n, nb = R.n;
+    ll *a = (ll *)malloc(sizeof(ll) * (na + 1));
+    ll *b = (ll *)malloc(sizeof(ll) * (nb + 1));
+    for (int i = 0; i < na; i++) a[i] = -L.a[i] + addL;
+    for (int i = 0; i < nb; i++) b[i] = R.a[i] + addR;
+    qsort(a, na, sizeof(ll), cmp);
+    qsort(b, nb, sizeof(ll), cmp);
+
+    ll *pa = (ll *)calloc(na + 1, sizeof(ll));
+    ll *pb = (ll *)calloc(nb + 1, sizeof(ll));
+    for (int i = 0; i < na; i++) pa[i + 1] = pa[i] + a[i];
+    for (int i = 0; i < nb; i++) pb[i + 1] = pb[i] + b[i];
+
+    for (int t = 0; t < q; t++) {
+        ll z;
+        scanf("%lld", &z);
+        ll res = mn;
+
+        /* first index in a with a[idx] > z */
+        int lo_ = 0, hi_ = na;
+        while (lo_ < hi_) {
+            int m = (lo_ + hi_) / 2;
+            if (a[m] > z) hi_ = m; else lo_ = m + 1;
+        }
+        int idx = lo_;
+        res += (pa[na] - pa[idx]) - (ll)(na - idx) * z;
+
+        /* first index in b with b[jdx] >= z */
+        lo_ = 0; hi_ = nb;
+        while (lo_ < hi_) {
+            int m = (lo_ + hi_) / 2;
+            if (b[m] >= z) hi_ = m; else lo_ = m + 1;
+        }
+        int jdx = lo_;
+        res += (ll)jdx * z - pb[jdx];
+
+        printf("%lld\n", res);
+    }
+    return 0;
+}
