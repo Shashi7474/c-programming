@@ -1,0 +1,28 @@
+#include <stdio.h>
+
+struct Student {
+    int id;
+    float marks;
+};
+
+int main() {
+    struct Student s1 = {101, 89.5};
+    struct Student s2;
+
+    FILE *fp = fopen("student.dat", "wb");
+
+    if (!fp) return 1;
+
+    fwrite(&s1, sizeof(s1), 1, fp);
+    fclose(fp);
+
+    fp = fopen("student.dat", "rb");
+
+    if (!fp) return 1;
+
+    if (fread(&s2, sizeof(s2), 1, fp) == 1)
+        printf("ID: %d\nMarks: %.2f", s2.id, s2.marks);
+
+    fclose(fp);
+    return 0;
+}
