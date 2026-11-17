@@ -1,0 +1,29 @@
+#include <stdio.h>
+#define SIZE 100
+
+char memory[SIZE];
+int used = 0;
+
+void *poolAlloc(int bytes) {
+    if (bytes <= 0 || used + bytes > SIZE)
+        return NULL;
+
+    void *ptr = &memory[used];
+    used += bytes;
+
+    return ptr;
+}
+
+int main() {
+    int *a = poolAlloc(sizeof(int));
+    float *b = poolAlloc(sizeof(float));
+
+    if (a && b) {
+        *a = 100;
+        *b = 25.5;
+
+        printf("%d %.2f", *a, *b);
+    }
+
+    return 0;
+}
