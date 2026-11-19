@@ -1,0 +1,21 @@
+#include <stdio.h>
+
+int main() {
+    int a[] = {10, 5, 2, 7, 1, 9};
+    int n = 6, k = 15;
+    int longest = 0;
+
+    for (int i = 0; i < n; i++) {
+        int sum = 0;
+
+        for (int j = i; j < n; j++) {
+            sum += a[j];
+
+            if (sum == k && j - i + 1 > longest)
+                longest = j - i + 1;
+        }
+    }
+
+    printf("Longest length: %d", longest);
+    return 0;
+}
