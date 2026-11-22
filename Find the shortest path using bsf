@@ -1,0 +1,39 @@
+#include <stdio.h>
+
+#define V 5
+
+int graph[V][V] = {
+    {0, 1, 1, 0, 0},
+    {1, 0, 0, 1, 0},
+    {1, 0, 0, 0, 1},
+    {0, 1, 0, 0, 0},
+    {0, 0, 1, 0, 0}
+};
+
+int main() {
+    int queue[100], distance[V];
+    int front = 0, rear = 0;
+
+    for (int i = 0; i < V; i++)
+        distance[i] = -1;
+
+    int source = 0;
+    distance[source] = 0;
+    queue[rear++] = source;
+
+    while (front < rear) {
+        int u = queue[front++];
+
+        for (int v = 0; v < V; v++) {
+            if (graph[u][v] && distance[v] == -1) {
+                distance[v] = distance[u] + 1;
+                queue[rear++] = v;
+            }
+        }
+    }
+
+    for (int i = 0; i < V; i++)
+        printf("Distance to %d: %d\n", i, distance[i]);
+
+    return 0;
+}
