@@ -1,0 +1,16 @@
+#include <stdio.h>
+#include <stdint.h>
+
+int main() {
+    int value = 100;
+    uintptr_t address = (uintptr_t)&value;
+
+    printf("Address: %p\n", (void *)&value);
+
+    if (address % _Alignof(int) == 0)
+        printf("Properly aligned");
+    else
+        printf("Not aligned");
+
+    return 0;
+}
